@@ -1,0 +1,19 @@
+{
+  "name": "dev-tinder-backend",
+  "version": "1.0.0",
+  "description": "Tinder like app for devs",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "npx nodemon src/app.js",
+    "start": "node src/app.js"
+  },
+  "author": "Akshith G",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^5.1.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}

@@ -1,16 +1,18 @@
 const express = require("express");
+const { connectDb } = require("./config/database.js");
 
 const app = express();
 
-app.use("/", (req, res) => {
-  res.send("Hello from the root page");
-});
-
-app.use("/test", (req, res) => {
-  res.send("Hello, this is the test route!");
-});
-
 const port = 3000;
-app.listen(port, () => {
-  console.log(`Listening on port ${port}...`);
-});
+
+connectDb()
+  .then(() => {
+    console.log("DB Connection successful");
+    app.listen(port, () => {
+      console.log(`Listening on port ${port}`);
+    });
+  })
+  .catch((err) => {
+    console.log("Something went wrong!");
+    console.error(err);
+  });

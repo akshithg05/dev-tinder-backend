@@ -11,6 +11,8 @@ const userSchema = new Schema(
     },
     lastName: {
       type: String,
+      minLength: 2,
+      maxLength: 50,
     },
     emailId: {
       type: String,
@@ -37,21 +39,10 @@ const userSchema = new Schema(
         values: ["male", "female", "others"],
       },
     },
-
-    // Below is custom validation
-    // gender: {
-    //   type: String,
-    //   validate: {
-    //     validator: () => {
-    //       if (!["male", "female", "others"].includes(value)) {
-    //         throw Error("The value of gender should be male, female or others");
-    //       }
-    //     },
-    //   },
-    // },
     about: {
       type: String,
       default: "This is the default about me of the user.",
+      maxLength: 1000,
     },
     photoURL: {
       type: String,
@@ -59,6 +50,7 @@ const userSchema = new Schema(
     },
     skills: {
       type: [String],
+      maxLength: 10,
     },
   },
   {

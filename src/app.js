@@ -82,7 +82,7 @@ app.get("/feed", async (req, res) => {
 // Get user by ID
 app.get("/user/:id", async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req?.params?.id;
     const user = await User.findById(id);
 
     if (!user) {
@@ -103,7 +103,7 @@ app.get("/user/:id", async (req, res) => {
 // Delete user by ID
 app.delete("/user/:id", async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req?.params?.id;
     const objectToDelete = await User.findByIdAndDelete(id);
 
     if (!objectToDelete) {
@@ -123,12 +123,37 @@ app.delete("/user/:id", async (req, res) => {
 // Update document by ID
 app.patch("/user/:id", async (req, res) => {
   try {
-    const id = req.params.id;
+    const id = req?.params?.id;
     const updatedBody = req.body;
+
+    const ALLOWED_UPDATES = ["firstName", "lastName", "gender", "age", "photoUrl", "about", "skills"];
+    const isUpdateAllowed = Object.keys(updatedBody).every((k) => ALLOWED_UPDATES.includes(k));
+
+    if (!isUpdateAllowed) {
+      const err = new Error(`Editable fields are ${ALLOWED_UPDATES}.`);
+      err.statusCode = 403;
+      throw err;
+    }
+
+    if (updatedBody?.skills?.length > 10) {
+      const err = new Error("Skills cannot be more than 10");
+      err.statusCode = 403;
+      throw err;
+    }
+
+    const uniqueSkills = new Set(updatedBody.skills);
+    if (uniqueSkills.size !== updatedBody.skills.length) {
+      const err = new Error("Skills must be unique");
+      err.statusCode = 403;
+      throw err;
+    }
+
     const user = await User.findByIdAndUpdate(id, updatedBody, { returnDocument: "after", runValidators: true });
 
     if (!user) {
-      throw Error(`There is no user with ID ${id}`);
+      const err = new Error(`There is no user with ID ${id}`);
+      err.statusCode = 404;
+      throw err;
     }
 
     res.send({
@@ -137,9 +162,8 @@ app.patch("/user/:id", async (req, res) => {
       },
     });
   } catch (err) {
-    res.status(404).send({
-      message: "Not found",
-      err: err.message,
+    res.status(err.statusCode || 500).send({
+      message: err.message,
     });
   }
 });
@@ -147,7 +171,7 @@ app.patch("/user/:id", async (req, res) => {
 // Update document by email
 app.patch("/user/email/:email", async (req, res) => {
   try {
-    const email = req.params.email;
+    const email = req?.params?.email;
     const updatedBody = req.body;
     const user = await User.findOneAndUpdate({ emailId: email }, updatedBody, { returnDocument: "after" });
 

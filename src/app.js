@@ -1,6 +1,11 @@
 const express = require("express");
+const brcypt = require("bcrypt");
 const { connectDb } = require("./config/database.js");
 const { User } = require("./models/user.js");
+const {
+  validateSignUpData,
+  validateLoginData,
+} = require("./utils/validation.js");
 
 const app = express();
 
@@ -11,9 +16,24 @@ app.use(express.json());
 // Create user/ sign up user
 app.post("/signup", async (req, res) => {
   try {
-    const newUser = req.body;
+    const { firstName, lastName, emailId, password, gender, about, skills } =
+      req?.body;
+    // Validte the data
+    validateSignUpData(req);
 
-    const user = new User(newUser);
+    // Encrypt passowrd
+    const passwordHash = await brcypt.hash(password, 10);
+
+    // Save user
+    const user = new User({
+      firstName,
+      lastName,
+      emailId,
+      gender,
+      about,
+      skills,
+      password: passwordHash,
+    });
     await user.save();
 
     res.status(201).send({
@@ -26,6 +46,31 @@ app.post("/signup", async (req, res) => {
     res.status(400).send({
       message: "Something went wrong!",
       err: err?.message,
+    });
+  }
+});
+
+// Login user
+app.post("/login", async (req, res) => {
+  try {
+    // Validate login data
+    validateLoginData(req);
+
+    const { emailId, password } = req?.body;
+    const user = await User.findOne({ emailId: emailId });
+
+    const isPasswordValid = await brcypt.compare(password, user?.password);
+
+    isPasswordValid
+      ? res.status(200).send({
+          message: "Logged in successfully!",
+        })
+      : res.status(404).send({
+          message: "Invalid credentials",
+        });
+  } catch (err) {
+    res.status(404).send({
+      message: "Invalid credentials",
     });
   }
 });
@@ -120,14 +165,39 @@ app.delete("/user/:id", async (req, res) => {
   }
 });
 
+// Delete all documents
+
+app.delete("/feed/delete", async (req, res) => {
+  try {
+    await User.deleteMany();
+    res.status(204).send({
+      message: "All documents deleted",
+    });
+  } catch (err) {
+    res.status(404).send({
+      message: err.message,
+    });
+  }
+});
+
 // Update document by ID
 app.patch("/user/:id", async (req, res) => {
   try {
     const id = req?.params?.id;
     const updatedBody = req.body;
 
-    const ALLOWED_UPDATES = ["firstName", "lastName", "gender", "age", "photoUrl", "about", "skills"];
-    const isUpdateAllowed = Object.keys(updatedBody).every((k) => ALLOWED_UPDATES.includes(k));
+    const ALLOWED_UPDATES = [
+      "firstName",
+      "lastName",
+      "gender",
+      "age",
+      "photoURL",
+      "about",
+      "skills",
+    ];
+    const isUpdateAllowed = Object.keys(updatedBody).every((k) =>
+      ALLOWED_UPDATES.includes(k)
+    );
 
     if (!isUpdateAllowed) {
       const err = new Error(`Editable fields are ${ALLOWED_UPDATES}.`);
@@ -148,7 +218,10 @@ app.patch("/user/:id", async (req, res) => {
       throw err;
     }
 
-    const user = await User.findByIdAndUpdate(id, updatedBody, { returnDocument: "after", runValidators: true });
+    const user = await User.findByIdAndUpdate(id, updatedBody, {
+      returnDocument: "after",
+      runValidators: true,
+    });
 
     if (!user) {
       const err = new Error(`There is no user with ID ${id}`);
@@ -173,7 +246,9 @@ app.patch("/user/email/:email", async (req, res) => {
   try {
     const email = req?.params?.email;
     const updatedBody = req.body;
-    const user = await User.findOneAndUpdate({ emailId: email }, updatedBody, { returnDocument: "after" });
+    const user = await User.findOneAndUpdate({ emailId: email }, updatedBody, {
+      returnDocument: "after",
+    });
 
     if (!user) {
       throw Error(`There is no user  with ID ${id}`);

@@ -1,4 +1,6 @@
 const mongoose = require("mongoose");
+const validator = require("validator");
+
 const { Schema, model } = mongoose;
 
 const userSchema = new Schema(
@@ -20,12 +22,24 @@ const userSchema = new Schema(
       unique: true,
       lowercase: true,
       trim: true,
+      validate: {
+        validator: function (value) {
+          return validator.isEmail(value);
+        },
+        message: "Please enter valid email",
+      },
     },
     password: {
       type: String,
       required: true,
       minLength: 6,
-      maxLength: 16,
+      maxLength: 100,
+      validate: {
+        validator: function (value) {
+          return validator.isStrongPassword(value);
+        },
+        message: "Enter stronger password, your password is too weak",
+      },
     },
     age: {
       type: Number,
@@ -46,7 +60,14 @@ const userSchema = new Schema(
     },
     photoURL: {
       type: String,
-      deafult: "https://www.vhv.rs/dpng/d/256-2569650_men-profile-icon-png-image-free-download-searchpng.png",
+      deafult:
+        "https://www.vhv.rs/dpng/d/256-2569650_men-profile-icon-png-image-free-download-searchpng.png",
+      validate: {
+        validator: function (value) {
+          return validator.isURL(value);
+        },
+        message: "Please enter proper photo URL",
+      },
     },
     skills: {
       type: [String],

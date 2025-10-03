@@ -1,5 +1,8 @@
 const express = require("express");
 const brcypt = require("bcrypt");
+const cookieParser = require("cookie-parser");
+const jwt = require("jsonwebtoken");
+const dotenv = require("dotenv");
 const { connectDb } = require("./config/database.js");
 const { User } = require("./models/user.js");
 const {
@@ -11,7 +14,9 @@ const app = express();
 
 const port = 3000;
 
+dotenv.config();
 app.use(express.json());
+app.use(cookieParser());
 
 // Create user/ sign up user
 app.post("/signup", async (req, res) => {
@@ -61,16 +66,27 @@ app.post("/login", async (req, res) => {
 
     const isPasswordValid = await brcypt.compare(password, user?.password);
 
-    isPasswordValid
-      ? res.status(200).send({
-          message: "Logged in successfully!",
-        })
-      : res.status(404).send({
-          message: "Invalid credentials",
-        });
+    if (isPasswordValid) {
+      // Create JWT token
+      const jwtToken = await jwt.sign(
+        { _id: user._id },
+        process.env.JWT_SECRET
+      );
+
+      // Set cookie to token
+      res.cookie("token", jwtToken);
+
+      res.status(200).send({
+        message: "Logged in successfully!",
+      });
+    } else {
+      res.status(404).send({
+        message: "Invalid credentials",
+      });
+    }
   } catch (err) {
     res.status(404).send({
-      message: "Invalid credentials",
+      message: err.message,
     });
   }
 });
@@ -263,6 +279,23 @@ app.patch("/user/email/:email", async (req, res) => {
     res.status(404).send({
       message: "Not found",
       err: err.message,
+    });
+  }
+});
+
+app.get("/profile", async (req, res) => {
+  try {
+    const { token } = req.cookies;
+    const decodedValue = await jwt.verify(token, process.env.JWT_SECRET);
+    console.log("Decoded value: ", decodedValue);
+
+    res.status(200).send({
+      message: "Reading cookie successful",
+    });
+  } catch (err) {
+    res.status(404).send({
+      err: "Not found",
+      message: err.message,
     });
   }
 });

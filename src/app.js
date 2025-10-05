@@ -1,7 +1,6 @@
 const express = require("express");
 const brcypt = require("bcrypt");
 const cookieParser = require("cookie-parser");
-const jwt = require("jsonwebtoken");
 const dotenv = require("dotenv");
 const { connectDb } = require("./config/database.js");
 const { User } = require("./models/user.js");
@@ -9,6 +8,7 @@ const {
   validateSignUpData,
   validateLoginData,
 } = require("./utils/validation.js");
+const { userAuth } = require("./middlewares/authMiddleware.js");
 
 const app = express();
 
@@ -63,18 +63,22 @@ app.post("/login", async (req, res) => {
 
     const { emailId, password } = req?.body;
     const user = await User.findOne({ emailId: emailId });
+    if (!user) {
+      let err = new Error("User not found");
+      err.statusCode = 404;
+      throw err;
+    }
 
-    const isPasswordValid = await brcypt.compare(password, user?.password);
+    const isPasswordValid = await user.verifyPassword(password);
 
     if (isPasswordValid) {
       // Create JWT token
-      const jwtToken = await jwt.sign(
-        { _id: user._id },
-        process.env.JWT_SECRET
-      );
+      const jwtToken = await user.getJWTToken();
 
       // Set cookie to token
-      res.cookie("token", jwtToken);
+      res.cookie("token", jwtToken, {
+        expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
+      });
 
       res.status(200).send({
         message: "Logged in successfully!",
@@ -85,8 +89,8 @@ app.post("/login", async (req, res) => {
       });
     }
   } catch (err) {
-    res.status(404).send({
-      message: err.message,
+    res.status(err?.statusCode || 500).send({
+      message: err?.message,
     });
   }
 });
@@ -283,19 +287,17 @@ app.patch("/user/email/:email", async (req, res) => {
   }
 });
 
-app.get("/profile", async (req, res) => {
+app.get("/profile", userAuth, async (req, res) => {
   try {
-    const { token } = req.cookies;
-    const decodedValue = await jwt.verify(token, process.env.JWT_SECRET);
-    console.log("Decoded value: ", decodedValue);
-
+    const user = req?.user;
     res.status(200).send({
-      message: "Reading cookie successful",
+      data: {
+        user,
+      },
     });
   } catch (err) {
-    res.status(404).send({
-      err: "Not found",
-      message: err.message,
+    res.status(err?.statusCode || 500).send({
+      message: err?.message,
     });
   }
 });

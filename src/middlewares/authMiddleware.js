@@ -7,7 +7,7 @@ async function userAuth(req, res, next) {
     const { token } = cookie;
 
     if (!token) {
-      let err = new Error("Invalid Token!!!");
+      let err = new Error("Invalid Token or user not signed in");
       err.statusCode = 401;
       throw err;
     }

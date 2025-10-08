@@ -1,4 +1,5 @@
 const validator = require("validator");
+const bcrypt = require("bcrypt");
 
 function validateSignUpData(req) {
   const { firstName, lastName, emailId, password } = req?.body || {};
@@ -40,4 +41,98 @@ function validateLoginData(req) {
   return true;
 }
 
-module.exports = { validateSignUpData, validateLoginData };
+function validateEditableData(data) {
+  const editableFields = [
+    "firstName",
+    "lastName",
+    "age",
+    "gender",
+    "about",
+    "photoURL",
+    "skills",
+  ];
+
+  const inValidKeys = [];
+  Object.keys(data).forEach((key) => {
+    if (!editableFields.includes(key)) {
+      inValidKeys.push(key);
+    }
+  });
+
+  if (inValidKeys.length > 0) {
+    const err = new Error(`${inValidKeys} not editable`);
+    err.statusCode = 401;
+    throw err;
+  }
+
+  if (
+    Object.keys(data).includes("photoURL") &&
+    !validator.isURL(data.photoURL)
+  ) {
+    const err = new Error(`Invalid URL`);
+    err.statusCode = 404;
+    throw err;
+  }
+  return true;
+}
+
+async function validateNewPassword(data, user) {
+  const validFields = ["currentPassword", "newPassword"];
+  const dataKeys = Object.keys(data);
+
+  const allKeysAreValid = dataKeys.every((key) => validFields.includes(key));
+
+  const hasCorrectNumberOfFields = dataKeys.length === validFields.length;
+
+  if (!allKeysAreValid || !hasCorrectNumberOfFields) {
+    const err = new Error(
+      `Please provide exactly these valid fields: ${validFields.join(", ")}`
+    );
+    err.statusCode = 404;
+    throw err;
+  }
+
+  const { currentPassword, newPassword } = data;
+  const isCurrentPasswordValid = await bcrypt.compare(
+    currentPassword,
+    user.password
+  );
+
+  const isNewPasswordValid = validator.isStrongPassword(newPassword);
+
+  // Current password validity check
+  if (!isCurrentPasswordValid) {
+    const err = new Error(
+      "Password incorrect, please enter valid current password"
+    );
+    err.statusCode = 401;
+    throw err;
+  }
+
+  // New password validity check
+  if (!isNewPasswordValid) {
+    const err = new Error(
+      "Your password must be at least 8 characters long and include at least one uppercase letter, one lowercase letter, one number, and one symbol."
+    );
+    err.statusCode = 401;
+    throw err;
+  }
+
+  // New password same as old password
+  if (currentPassword === newPassword) {
+    const err = new Error(
+      "New password cannot be same as the current password"
+    );
+    err.statusCode = 401;
+    throw err;
+  }
+
+  return true;
+}
+
+module.exports = {
+  validateSignUpData,
+  validateLoginData,
+  validateEditableData,
+  validateNewPassword,
+};

@@ -23,12 +23,16 @@ const connectionRequestSchema = new mongoose.Schema(
   }
 );
 
+// Compound index to store fromUserId and toUserId in ascending order.
+connectionRequestSchema.index({ fromUserId: 1, toUserId: 1 });
+
 connectionRequestSchema.pre("save", function (next) {
   if (this.fromUserId.equals(this.toUserId)) {
     const err = new Error("From user id and to user id cannot be the same");
     err.statusCode = 409;
     throw err;
   }
+  next();
 });
 
 const ConnectionRequest = mongoose.model(

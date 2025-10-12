@@ -1,4 +1,5 @@
 const express = require("express");
+const mongoose = require("mongoose");
 const { userAuth } = require("../middlewares/authMiddleware");
 const { User } = require("../models/user");
 const { ConnectionRequest } = require("../models/connectionRequest");
@@ -7,7 +8,7 @@ const { CONNECTION_REQUEST_STATUS } = require("../utils/constants");
 const requestRouter = express.Router();
 
 requestRouter.post(
-  "/sendConnectionRequest/:status/:toUserId",
+  "/request/send/:status/:toUserId",
   userAuth,
   async (req, res) => {
     try {
@@ -69,6 +70,65 @@ requestRouter.post(
       });
     } catch (err) {
       res.status(err?.statusCode || 404).send({
+        message: err?.message,
+      });
+    }
+  }
+);
+
+// Accept or reject connection request
+requestRouter.post(
+  "/request/review/:status/:requestId",
+  userAuth,
+  async (req, res) => {
+    try {
+      const loggedInUser = req?.user;
+      const { status, requestId } = req?.params;
+
+      // RequestID validation
+      if (!mongoose.Types.ObjectId.isValid(requestId)) {
+        const err = new Error("Please enter a valid request ID");
+        err.statusCode = 400;
+        throw err;
+      }
+
+      // Status validation
+      const allowedStatus = ["ACCEPTED", "REJECTED"];
+      const isStatusAllowed = allowedStatus.includes(
+        CONNECTION_REQUEST_STATUS[status]
+      );
+
+      if (!isStatusAllowed) {
+        const err = new Error("Connection status not allowed");
+        err.statusCode = 401;
+        throw err;
+      }
+
+      // Find connection request
+      console.log(loggedInUser._id);
+      console.log(requestId);
+      const connectionRequest = await ConnectionRequest.findOne({
+        _id: requestId,
+        toUserId: loggedInUser?._id,
+        status: "INTERESTED",
+      });
+
+      if (!connectionRequest) {
+        const err = new Error("Connection request not found");
+        err.statusCode = 404;
+        throw err;
+      }
+
+      // Save to database
+      connectionRequest.status = CONNECTION_REQUEST_STATUS[status];
+      await connectionRequest.save();
+
+      res.status(200).send({
+        message: `Connecttion request ${status} successfully.`,
+        data: connectionRequest,
+      });
+    } catch (err) {
+      res.status(err?.statusCode || 400).send({
         message: err?.message,
       });
     }

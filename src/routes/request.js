@@ -105,8 +105,6 @@ requestRouter.post(
       }
 
       // Find connection request
-      console.log(loggedInUser._id);
-      console.log(requestId);
       const connectionRequest = await ConnectionRequest.findOne({
         _id: requestId,
         toUserId: loggedInUser?._id,

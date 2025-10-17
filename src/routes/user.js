@@ -128,6 +128,20 @@ userRouter.get("/feed", userAuth, async (req, res) => {
   try {
     const loggedInUser = req.user;
 
+    const page = parseInt(req?.query?.page) || 1;
+    let limit = parseInt(req?.query?.limit) || 10;
+    const skip = (page - 1) * limit;
+
+    if (!limit) {
+      const err = new Error("Enter valid limit");
+      err.statusCode = 400;
+      throw err;
+    }
+
+    if (limit > 100) {
+      limit = 100;
+    }
+
     // Step 1: Find all users you sent requests to (exclude all)
     const sentRequests = await ConnectionRequest.find({
       fromUserId: loggedInUser._id,
@@ -149,9 +163,13 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     // Step 4: Fetch users who are not in invalid list
     const validUsers = await User.find({
       _id: { $nin: invalidUsers },
-    }).select("firstName lastName about photoURL age gender skills");
+    })
+      .select("firstName lastName about photoURL age gender skills")
+      .skip(skip)
+      .limit(limit);
 
     res.status(200).send({
+      count: validUsers.length,
       data: validUsers,
     });
   } catch (err) {

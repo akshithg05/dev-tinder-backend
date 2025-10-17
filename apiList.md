@@ -27,3 +27,7 @@
 - GET /user/feed (on load of page) - (GEts the profiles of other users when you refresh your feed)
 
   Status: ignore(left swipe), interested(right swipe), accepted, rejected
+
+/feed?page=1&limit=10 => page 1-10
+/feed?page=2&limit=10 => page 11-20
+/feed?page=3&limit=10 => page 21-30

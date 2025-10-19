@@ -34,9 +34,13 @@ function validateSignUpData(req) {
 function validateLoginData(req) {
   const { emailId, password } = req?.body;
   if (!validator.isEmail(emailId)) {
-    throw new Error("Invalid credentials");
+    const err = new Error("Invalid credentials !");
+    err.statusCode = 400;
+    throw err;
   } else if (!validator.isStrongPassword(password)) {
-    throw new Error("Invalid credentials");
+    const err = new Error("Invalid credentials !");
+    err.statusCode = 400;
+    throw err;
   }
   return true;
 }

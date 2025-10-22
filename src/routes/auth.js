@@ -11,8 +11,16 @@ const authRouter = express.Router();
 // Create user/ sign up user
 authRouter.post("/signup", async (req, res) => {
   try {
-    const { firstName, lastName, emailId, password, gender, about, skills } =
-      req?.body;
+    const {
+      firstName,
+      lastName,
+      emailId,
+      password,
+      gender,
+      about,
+      skills,
+      role,
+    } = req?.body;
     // Validte the data
     validateSignUpData(req);
 
@@ -28,6 +36,7 @@ authRouter.post("/signup", async (req, res) => {
       about,
       skills,
       password: passwordHash,
+      role,
     });
     await user.save();
 

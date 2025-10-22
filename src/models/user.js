@@ -64,7 +64,7 @@ const userSchema = new Schema(
     photoURL: {
       type: String,
       deafult:
-        "https://www.vhv.rs/dpng/d/256-2569650_men-profile-icon-png-image-free-download-searchpng.png",
+        "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",
       validate: {
         validator: function (value) {
           return validator.isURL(value);
@@ -75,6 +75,14 @@ const userSchema = new Schema(
     skills: {
       type: [String],
       maxLength: 10,
+    },
+    role: {
+      type: String,
+      default: "USER",
+      enum: {
+        values: ["USER"],
+        message: `{VALUE} is not a valid role`,
+      },
     },
   },
   {

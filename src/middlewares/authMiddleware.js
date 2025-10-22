@@ -32,4 +32,20 @@ async function userAuth(req, res, next) {
   }
 }
 
-module.exports = { userAuth };
+async function checkUserRole(req, res, next) {
+  try {
+    let userRole = req?.user?.role;
+    if (userRole !== "ADMIN") {
+      let err = new Error("Unauthorized action");
+      err.statusCode = 401;
+      throw err;
+    }
+    next();
+  } catch (err) {
+    res.status(err?.statusCode || 500).send({
+      message: err?.message,
+    });
+  }
+}
+
+module.exports = { userAuth, checkUserRole };

@@ -38,4 +38,28 @@ adminRouter.patch("/users/:id", userAuth, checkUserRole, async (req, res) => {
   }
 });
 
+adminRouter.delete("/users/:id", userAuth, checkUserRole, async (req, res) => {
+  try {
+    const userId = req?.params?.id;
+    await User.findByIdAndDelete(userId);
+    res.status(204).send({
+      message: `User ${userId} deleted successfully`,
+    });
+  } catch (err) {
+    res.status(err?.statusCode || 404).send({
+      message: err?.message,
+    });
+  }
+});
+
+adminRouter.delete("/users/", userAuth, checkUserRole, async (req, res) => {
+  try {
+    await User.deleteMany();
+  } catch (err) {
+    res.status(err?.statusCode || 404).send({
+      message: err?.message,
+    });
+  }
+});
+
 module.exports = adminRouter;

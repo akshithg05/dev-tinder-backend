@@ -16,7 +16,7 @@ userRouter.get("/user/requests/pending", userAuth, async (req, res) => {
       "firstName",
       "lastName",
       "about",
-      "photoURL",
+      "photoUrl",
       "age",
       "gender",
     ]);
@@ -44,7 +44,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         "firstName",
         "lastName",
         "about",
-        "photoURL",
+        "photoUrl",
         "age",
         "gender",
       ])
@@ -52,7 +52,7 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
         "firstName",
         "lastName",
         "about",
-        "photoURL",
+        "photoUrl",
         "age",
         "gender",
       ]);
@@ -107,7 +107,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
 
     const validUsers = await User.find({
       _id: { $nin: invalidUsers },
-    }).select("firstName lastName about photoURL age gender skills");
+    }).select("firstName lastName about photoUrl age gender skills");
 
     res.status(200).send({
       data: validUsers,
@@ -164,7 +164,7 @@ userRouter.get("/feed", userAuth, async (req, res) => {
     const validUsers = await User.find({
       _id: { $nin: invalidUsers },
     })
-      .select("firstName lastName about photoURL age gender skills")
+      .select("firstName lastName about photoUrl age gender skills")
       .skip(skip)
       .limit(limit);
 

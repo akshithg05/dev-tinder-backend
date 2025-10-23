@@ -52,7 +52,7 @@ function validateEditableData(data) {
     "age",
     "gender",
     "about",
-    "photoURL",
+    "photoUrl",
     "skills",
   ];
 
@@ -70,8 +70,8 @@ function validateEditableData(data) {
   }
 
   if (
-    Object.keys(data).includes("photoURL") &&
-    !validator.isURL(data.photoURL)
+    Object.keys(data).includes("photoUrl") &&
+    !validator.isURL(data.photoUrl)
   ) {
     const err = new Error(`Invalid URL`);
     err.statusCode = 404;

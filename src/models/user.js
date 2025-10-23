@@ -62,7 +62,7 @@ const userSchema = new Schema(
       default: "This is the default about me of the user.",
       maxLength: 1000,
     },
-    photoURL: {
+    photoUrl: {
       type: String,
       deafult:
         "https://img.daisyui.com/images/stock/photo-1534528741775-53994a69daeb.webp",

@@ -122,7 +122,7 @@ requestRouter.post(
       await connectionRequest.save();
 
       res.status(200).send({
-        message: `Connecttion request ${status} successfully.`,
+        message: `Connection request ${status} successfully.`,
         data: connectionRequest,
       });
     } catch (err) {

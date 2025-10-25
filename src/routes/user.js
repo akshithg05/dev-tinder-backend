@@ -67,9 +67,8 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
     });
 
     res.status(200).send({
-      data: {
-        connections,
-      },
+      count: connections.length,
+      connections,
     });
   } catch (err) {
     res.status(err?.statusCode || 400).send({

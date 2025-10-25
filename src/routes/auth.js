@@ -21,6 +21,7 @@ authRouter.post("/signup", async (req, res) => {
       skills,
       role,
       age,
+      photoUrl,
     } = req?.body;
     // Validte the data
     validateSignUpData(req);
@@ -39,6 +40,7 @@ authRouter.post("/signup", async (req, res) => {
       password: passwordHash,
       role,
       age,
+      photoUrl,
     });
     await user.save();
 

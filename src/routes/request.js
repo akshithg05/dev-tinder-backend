@@ -40,7 +40,7 @@ requestRouter.post(
         throw err;
       }
 
-      // Check if connection request already exists between users
+      // Check if connection request already exists between users, but not interested
       const isConnectionRequestPresent = await ConnectionRequest.find({
         $or: [
           {
@@ -49,20 +49,40 @@ requestRouter.post(
           },
           { fromUserId: toUserId, toUserId: fromUserId },
         ],
+        status: { $ne: CONNECTION_REQUEST_STATUS.interested },
       });
       if (isConnectionRequestPresent.length > 0) {
         const err = new Error("Connection request already exists!");
         err.statusCode = 409;
         throw err;
       }
-
-      const connectionRequest = new ConnectionRequest({
-        fromUserId,
-        toUserId,
-        status,
+      const interestedRequestPresent = await ConnectionRequest.findOne({
+        $or: [
+          {
+            fromUserId,
+            toUserId,
+          },
+          { fromUserId: toUserId, toUserId: fromUserId },
+        ],
+        status: CONNECTION_REQUEST_STATUS.interested,
       });
 
-      const data = await connectionRequest.save();
+      let data;
+
+      if (interestedRequestPresent) {
+        interestedRequestPresent.status = CONNECTION_REQUEST_STATUS.accepted;
+        data = await interestedRequestPresent.save();
+      }
+
+      if (!interestedRequestPresent) {
+        const connectionRequest = new ConnectionRequest({
+          fromUserId,
+          toUserId,
+          status,
+        });
+
+        data = await connectionRequest.save();
+      }
 
       res.status(201).send({
         message: `Connection request ${req?.params?.status || "sent "}`,

@@ -2,7 +2,7 @@ const validator = require("validator");
 const bcrypt = require("bcrypt");
 
 function validateSignUpData(req) {
-  const { firstName, lastName, emailId, password } = req?.body || {};
+  const { firstName, lastName, emailId, password, age } = req?.body || {};
 
   if (!firstName || !lastName) {
     const err = new Error("First name and last name are required");
@@ -12,6 +12,12 @@ function validateSignUpData(req) {
 
   if (firstName.length < 2 || lastName.length < 2) {
     const err = new Error("The length of the name should be greater than 2");
+    err.statusCode = 400;
+    throw err;
+  }
+
+  if (!age) {
+    const err = new Error("Age is required");
     err.statusCode = 400;
     throw err;
   }

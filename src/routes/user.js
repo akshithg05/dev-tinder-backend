@@ -178,4 +178,24 @@ userRouter.get("/feed", userAuth, async (req, res) => {
   }
 });
 
+userRouter.get("/user/:userId", userAuth, async (req, res) => {
+  try {
+    const userId = req?.params?.userId;
+    const user = await User.findById(userId);
+
+    if (!user){
+      const err = new Error('User not found')
+      err.statusCode = 404
+      throw err
+    }
+    res.status(200).send({
+      user,
+    });
+  } catch (err) {
+    res.status(err?.statusCode || 404).send({
+      message: err?.message || "Not found!",
+    });
+  }
+});
+
 module.exports = userRouter;

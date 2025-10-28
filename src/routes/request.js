@@ -68,9 +68,11 @@ requestRouter.post(
       });
 
       let data;
+      let isMatch = false;
 
       if (interestedRequestPresent) {
         interestedRequestPresent.status = CONNECTION_REQUEST_STATUS.accepted;
+        isMatch = true;
         data = await interestedRequestPresent.save();
       }
 
@@ -87,6 +89,7 @@ requestRouter.post(
       res.status(201).send({
         message: `Connection request ${req?.params?.status || "sent "}`,
         data,
+        isMatch,
       });
     } catch (err) {
       res.status(err?.statusCode || 404).send({

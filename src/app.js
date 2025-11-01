@@ -18,7 +18,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(
   cors({
-    origin: "http://localhost:5173", // Whitelisting origin name
+    origin: ["http://localhost:5173", "https://dev-tidner.netlify.app"], // Whitelisting origin name
     credentials: true,
   })
 );

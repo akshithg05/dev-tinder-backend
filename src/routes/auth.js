@@ -1,10 +1,11 @@
 const express = require("express");
+const brcypt = require("bcrypt");
+const { User } = require("../models/user.js");
 const {
   validateSignUpData,
   validateLoginData,
 } = require("../utils/validation.js");
-const { User } = require("../models/user.js");
-const brcypt = require("bcrypt");
+const { sendMail } = require("../utils/email.js");
 
 const authRouter = express.Router();
 
@@ -43,6 +44,19 @@ authRouter.post("/signup", async (req, res) => {
       photoUrl,
     });
     await user.save();
+
+    await sendMail(
+      emailId,
+      "Welcome to DevTinder!",
+      `Hi ${user?.firstName},
+
+        Thank you for signing up on DevTinder! 🎉
+
+        We’re excited to have you on board. Start exploring and connect with others.
+
+        Happy swiping!,
+        The DevTinder Team`
+    );
 
     res.status(201).send({
       message: "User created successfully!",
@@ -84,6 +98,17 @@ authRouter.post("/login", async (req, res) => {
         sameSite: "none", // required for cross-site cookies
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       });
+
+      await sendMail(
+        emailId,
+        "Login alert on DevTinder",
+        `Hi ${
+          user?.firstName
+        }, you have logged into DevTinder at ${new Date().toLocaleString(
+          "en-IN",
+          { dateStyle: "medium", timeStyle: "short" }
+        )}`
+      );
 
       res.status(200).send({
         message: "Logged in successfully!",

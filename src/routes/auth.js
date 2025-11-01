@@ -45,7 +45,7 @@ authRouter.post("/signup", async (req, res) => {
     });
     await user.save();
 
-    await sendMail(
+    sendMail(
       emailId,
       "Welcome to DevTinder!",
       `Hi ${user?.firstName},
@@ -56,7 +56,7 @@ authRouter.post("/signup", async (req, res) => {
 
         Happy swiping!,
         The DevTinder Team`
-    );
+    ).catch((err) => console.error("Email failed:", err));
 
     res.status(201).send({
       message: "User created successfully!",
@@ -99,7 +99,7 @@ authRouter.post("/login", async (req, res) => {
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       });
 
-      await sendMail(
+      sendMail(
         emailId,
         "Login alert on DevTinder",
         `Hi ${
@@ -108,7 +108,7 @@ authRouter.post("/login", async (req, res) => {
           "en-IN",
           { dateStyle: "medium", timeStyle: "short" }
         )}`
-      );
+      ).catch((err) => console.error("Email failed:", err));
 
       res.status(200).send({
         message: "Logged in successfully!",

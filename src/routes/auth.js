@@ -94,8 +94,9 @@ authRouter.post("/login", async (req, res) => {
 
       // Set cookie to token
       res.cookie("token", jwtToken, {
-        secure: true, // must be true on HTTPS (Render)
-        sameSite: "none", // required for cross-site cookies
+        httpOnly: true, // prevents client-side access
+        secure: true, // HTTPS only
+        sameSite: "none", // cross-site cookie support
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       });
 
@@ -128,7 +129,11 @@ authRouter.post("/login", async (req, res) => {
 
 authRouter.post("/logout", async (req, res) => {
   try {
-    res.clearCookie("token");
+    res.clearCookie("token", {
+      httpOnly: true,
+      secure: true,
+      sameSite: "none",
+    });
     res.status(200).send({
       message: "Logged out successfully!",
     });

@@ -80,6 +80,8 @@ authRouter.post("/login", async (req, res) => {
 
       // Set cookie to token
       res.cookie("token", jwtToken, {
+        secure: true, // must be true on HTTPS (Render)
+        sameSite: "none", // required for cross-site cookies
         expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000),
       });
 

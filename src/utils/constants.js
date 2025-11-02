@@ -5,4 +5,6 @@ const CONNECTION_REQUEST_STATUS = {
   rejected: "REJECTED",
 };
 
-module.exports = { CONNECTION_REQUEST_STATUS };
+const BASE_URL = "https://dev-tidner.netlify.app/connections";
+
+module.exports = { CONNECTION_REQUEST_STATUS, BASE_URL };

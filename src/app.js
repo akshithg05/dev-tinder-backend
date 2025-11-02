@@ -8,6 +8,7 @@ const profileRouter = require("./routes/profile.js");
 const requestRouter = require("./routes/request.js");
 const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
+require("./utils/cronJob.js");
 
 const app = express();
 dotenv.config();

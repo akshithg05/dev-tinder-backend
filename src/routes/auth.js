@@ -78,7 +78,7 @@ authRouter.post("/login", async (req, res) => {
     // Validate login data
     validateLoginData(req);
 
-    const { emailId, password } = req?.body;
+    const { emailId, password, loginTime } = req?.body;
     const user = await User.findOne({ emailId: emailId });
     if (!user) {
       let err = new Error("User not found");
@@ -103,12 +103,12 @@ authRouter.post("/login", async (req, res) => {
       sendMail(
         emailId,
         "Login alert on DevTinder",
-        `Hi ${
-          user?.firstName
-        }, you have logged into DevTinder at ${new Date().toLocaleString(
-          "en-IN",
-          { dateStyle: "medium", timeStyle: "short" }
-        )}`
+        `Hi ${user?.firstName}, you have logged into DevTinder at ${
+          loginTime?.toLocaleString("en-IN", {
+            dateStyle: "medium",
+            timeStyle: "short",
+          }) || new Date().toLocaleString()
+        }`
       ).catch((err) => console.error("Email failed:", err));
 
       res.status(200).send({

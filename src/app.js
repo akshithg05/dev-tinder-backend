@@ -8,6 +8,7 @@ const profileRouter = require("./routes/profile.js");
 const requestRouter = require("./routes/request.js");
 const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
+const paymentRouter = require("./routes/payment.js");
 require("./utils/cronJob.js");
 
 const app = express();
@@ -30,6 +31,7 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", adminRouter);
+app.use("/", paymentRouter);
 
 connectDb()
   .then(() => {

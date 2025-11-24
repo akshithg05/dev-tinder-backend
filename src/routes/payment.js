@@ -55,7 +55,7 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 // We do not need userAuth here as razorpay is going to call this API.
 paymentRouter.post("/payment/webook", async (req, res) => {
   try {
-    const webhookSignature = req.headers["X-Razorpay-Signature"];
+    const webhookSignature = req.get("X-Razorpay-Signature");
     const isWebhookValid = validateWebhookSignature(
       JSON.stringify(req.body),
       webhookSignature,

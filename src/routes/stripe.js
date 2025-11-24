@@ -1,0 +1,43 @@
+const express = require("express");
+const stripe = require("../utils/stripe");
+const { MEMBERSHIP_PAYMENT, BACKEND_URL } = require("../utils/constants");
+
+const router = express.Router();
+
+router.post("/payment/create-checkout-session", async (req, res) => {
+  try {
+    const membershipType = req.body.membershipType;
+    const userId = req.body.userId; // optional, if you have login
+
+    const session = await stripe.checkout.sessions.create({
+      mode: "payment",
+      payment_method_types: ["card"],
+      line_items: [
+        {
+          price_data: {
+            currency: "inr",
+            product_data: {
+              name: `${membershipType} Membership`,
+            },
+            unit_amount: MEMBERSHIP_PAYMENT[membershipType],
+          },
+          quantity: 1,
+        },
+      ],
+      metadata: {
+        membershipType,
+        userId: userId || "",
+      },
+      expand: ["payment_intent"],
+      success_url: `${BACKEND_URL}/premium`,
+      cancel_url: `${BACKEND_URL}/cancel`,
+    });
+
+    res.json({ id: session.id, url: session.url });
+  } catch (err) {
+    console.error("Stripe error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+module.exports = router;

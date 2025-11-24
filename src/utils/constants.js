@@ -12,4 +12,11 @@ const MEMBERSHIP_PAYMENT = {
   GOLD: 60000,
 };
 
-module.exports = { CONNECTION_REQUEST_STATUS, BASE_URL, MEMBERSHIP_PAYMENT };
+const BACKEND_URL = "https://dev-tinder-backend-r1ek.onrender.com";
+
+module.exports = {
+  CONNECTION_REQUEST_STATUS,
+  BASE_URL,
+  MEMBERSHIP_PAYMENT,
+  BACKEND_URL,
+};

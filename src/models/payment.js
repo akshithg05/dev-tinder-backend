@@ -7,7 +7,7 @@ const paymentSchema = new Schema(
     userId: {
       type: mongoose.Types.ObjectId,
       ref: "User",
-      required: true,
+      required: false,
     },
     orderId: {
       type: String,

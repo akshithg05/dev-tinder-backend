@@ -85,6 +85,17 @@ const userSchema = new Schema(
         message: `{VALUE} is not a valid role`,
       },
     },
+    isPremium: {
+      type: Boolean,
+      default: false,
+    },
+    membershipType: {
+      type: String,
+    },
+    membershipValidity: {
+      type: String,
+      default: 0,
+    },
   },
   {
     timestamps: true,

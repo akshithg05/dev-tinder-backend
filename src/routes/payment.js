@@ -54,53 +54,50 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
 });
 
 // We do not need userAuth here as razorpay is going to call this API.
-paymentRouter.post("/payment/webook", async (req, res) => {
+paymentRouter.post("/payment/webhook", async (req, res) => {
   try {
-    const webhookSignature = req.headers["X-Razorpay-Signature"];
+    const webhookSignature = req.headers["x-razorpay-signature"];
+
+    const body = req.body.toString();
+
     const isWebhookValid = validateWebhookSignature(
-      JSON.stringify(req.body),
+      body,
       webhookSignature,
       process.env.RZP_WEBHOOK_SECRET
     );
 
-    // In the case of inValid webook
     if (!isWebhookValid) {
-      res.status(403).send({
-        message: "Invalid webook",
+      return res.status(403).send({
+        message: "Invalid webhook signature",
       });
     }
 
-    // If webhook is valid
-    // Update my payment status in DB
+    const paymentDetails = JSON.parse(body).payload.payment.entity;
 
-    const paymentDetails = req?.body?.payload?.payment?.entity;
     const payment = await Payment.findOne({
-      orderId: paymentDetails?.order_id,
+      orderId: paymentDetails.order_id,
     });
-    payment.status = paymentDetails?.status;
+
+    if (!payment) {
+      return res.status(404).send({ message: "Payment not found" });
+    }
+
+    payment.status = paymentDetails.status;
     await payment.save();
 
-    // Update the user as premium
+    const user = await User.findById(payment.userId);
+    if (user) {
+      user.isPremium = true;
+      user.membershipType = payment.notes.membershipType;
+      await user.save();
+    }
 
-    const user = await User.findOne({ _id: payment?.userId });
-    user.isPremium = true;
-    user.membershipType = payment?.notes?.membershipType;
-    await user.save();
-
-    // return success response to razorpay
-
-    // if (req.body.event === "payment.captured") {
-    // }
-
-    // if (req.body.event === "payment.failed") {
-    // }
-
-    res.status(200).json({
-      message: "Webhook recieved successfully",
+    return res.status(200).json({
+      message: "Webhook received successfully",
     });
   } catch (err) {
-    res.status(500).send({
-      message: err?.message,
+    return res.status(500).json({
+      message: err.message,
     });
   }
 });

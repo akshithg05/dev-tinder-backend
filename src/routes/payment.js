@@ -14,7 +14,6 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   try {
     const { membershipType } = req.body;
     const { firstName, lastName, emailId } = req.user;
-    console.log(MEMBERSHIP_PAYMENT[membershipType]);
 
     const order = await razorpayInstance.orders.create({
       amount: MEMBERSHIP_PAYMENT[membershipType],
@@ -43,9 +42,13 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
     const savedPayment = await payment.save();
 
     // return order details to frontend
-    res
-      .status(200)
-      .send({ ...savedPayment.toJSON(), keyId: process.env.RZP_API_KEY });
+    res.status(200).send({
+      key: process.env.RZP_API_KEY,
+      order_id: order.id,
+      amount: order.amount,
+      currency: order.currency,
+      notes: order.notes,
+    });
   } catch (err) {
     res.status(404).send({
       message: err?.message,
@@ -53,53 +56,53 @@ paymentRouter.post("/payment/create", userAuth, async (req, res) => {
   }
 });
 
-// We do not need userAuth here as razorpay is going to call this API.
-paymentRouter.post("/payment/webhook", async (req, res) => {
-  try {
-    const webhookSignature = req.headers["x-razorpay-signature"];
+// // We do not need userAuth here as razorpay is going to call this API.
+// paymentRouter.post("/payment/webhook", async (req, res) => {
+//   try {
+//     const webhookSignature = req.headers["x-razorpay-signature"];
 
-    const body = req.body.toString();
+//     const body = req.body.toString();
 
-    const isWebhookValid = validateWebhookSignature(
-      body,
-      webhookSignature,
-      process.env.RZP_WEBHOOK_SECRET
-    );
+//     const isWebhookValid = validateWebhookSignature(
+//       body,
+//       webhookSignature,
+//       process.env.RZP_WEBHOOK_SECRET
+//     );
 
-    if (!isWebhookValid) {
-      return res.status(403).send({
-        message: "Invalid webhook signature",
-      });
-    }
+//     if (!isWebhookValid) {
+//       return res.status(403).send({
+//         message: "Invalid webhook signature",
+//       });
+//     }
 
-    const paymentDetails = JSON.parse(body).payload.payment.entity;
+//     const paymentDetails = JSON.parse(body).payload.payment.entity;
 
-    const payment = await Payment.findOne({
-      orderId: paymentDetails.order_id,
-    });
+//     const payment = await Payment.findOne({
+//       orderId: paymentDetails.order_id,
+//     });
 
-    if (!payment) {
-      return res.status(404).send({ message: "Payment not found" });
-    }
+//     if (!payment) {
+//       return res.status(404).send({ message: "Payment not found" });
+//     }
 
-    payment.status = paymentDetails.status;
-    await payment.save();
+//     payment.status = paymentDetails.status;
+//     await payment.save();
 
-    const user = await User.findById(payment.userId);
-    if (user) {
-      user.isPremium = true;
-      user.membershipType = payment.notes.membershipType;
-      await user.save();
-    }
+//     const user = await User.findById(payment.userId);
+//     if (user) {
+//       user.isPremium = true;
+//       user.membershipType = payment.notes.membershipType;
+//       await user.save();
+//     }
 
-    return res.status(200).json({
-      message: "Webhook received successfully",
-    });
-  } catch (err) {
-    return res.status(500).json({
-      message: err.message,
-    });
-  }
-});
+//     return res.status(200).json({
+//       message: "Webhook received successfully",
+//     });
+//   } catch (err) {
+//     return res.status(500).json({
+//       message: err.message,
+//     });
+//   }
+// });
 
 module.exports = paymentRouter;

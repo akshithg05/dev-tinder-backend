@@ -13,7 +13,7 @@ const router = express.Router();
 router.post("/payment/create-checkout-session", userAuth, async (req, res) => {
   try {
     const membershipType = req.body.membershipType;
-    const userId = req?.user?._id;
+    const userId = String(req?.user?._id);
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

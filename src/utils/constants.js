@@ -13,10 +13,12 @@ const MEMBERSHIP_PAYMENT = {
 };
 
 const BACKEND_URL = "https://dev-tinder-backend-r1ek.onrender.com";
+const LOCALHOST_URL = "http://localhost:5173";
 
 module.exports = {
   CONNECTION_REQUEST_STATUS,
   BASE_URL,
   MEMBERSHIP_PAYMENT,
   BACKEND_URL,
+  LOCALHOST_URL,
 };

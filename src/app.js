@@ -10,12 +10,14 @@ const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
 const stripeRouter = require("./routes/stripe.js");
 require("./utils/cronJob.js");
+const stripeWebhook = require("./routes/stripeWebhook");
 
 const app = express();
 dotenv.config();
 
 const port = process.env.PORT;
 
+app.use("/payment", stripeWebhook);
 app.use(express.json());
 app.use(cookieParser());
 app.use(

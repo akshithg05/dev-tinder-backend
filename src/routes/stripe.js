@@ -1,13 +1,17 @@
 const express = require("express");
 const stripe = require("../utils/stripe");
-const { MEMBERSHIP_PAYMENT, BACKEND_URL } = require("../utils/constants");
+const {
+  MEMBERSHIP_PAYMENT,
+  BACKEND_URL,
+  LOCALHOST_URL,
+} = require("../utils/constants");
 
 const router = express.Router();
 
 router.post("/payment/create-checkout-session", async (req, res) => {
   try {
     const membershipType = req.body.membershipType;
-    const userId = req.body.userId; // optional, if you have login
+    const userId = req.body.userId;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",

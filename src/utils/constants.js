@@ -22,4 +22,5 @@ module.exports = {
   MEMBERSHIP_PAYMENT,
   BACKEND_URL,
   LOCALHOST_URL,
+  FRONTEND_URL,
 };

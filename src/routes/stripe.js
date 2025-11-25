@@ -4,14 +4,16 @@ const {
   MEMBERSHIP_PAYMENT,
   BACKEND_URL,
   LOCALHOST_URL,
+  FRONTEND_URL,
 } = require("../utils/constants");
+const { userAuth } = require("../middlewares/authMiddleware");
 
 const router = express.Router();
 
-router.post("/payment/create-checkout-session", async (req, res) => {
+router.post("/payment/create-checkout-session", userAuth, async (req, res) => {
   try {
     const membershipType = req.body.membershipType;
-    const userId = req.body.userId;
+    const userId = req?.user?._id;
 
     const session = await stripe.checkout.sessions.create({
       mode: "payment",
@@ -30,11 +32,11 @@ router.post("/payment/create-checkout-session", async (req, res) => {
       ],
       metadata: {
         membershipType,
-        userId: userId || "",
+        userId: userId,
       },
       expand: ["payment_intent"],
-      success_url: `${BACKEND_URL}/premium`,
-      cancel_url: `${BACKEND_URL}/cancel`,
+      success_url: `${FRONTEND_URL}/premium`,
+      cancel_url: `${FRONTEND_URL}/cancel`,
     });
 
     res.json({ id: session.id, url: session.url });

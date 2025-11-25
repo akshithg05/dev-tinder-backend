@@ -13,6 +13,7 @@ const MEMBERSHIP_PAYMENT = {
 };
 
 const BACKEND_URL = "https://dev-tinder-backend-r1ek.onrender.com";
+const FRONTEND_URL = "https://dev-tidner.netlify.app";
 const LOCALHOST_URL = "http://localhost:5173";
 
 module.exports = {

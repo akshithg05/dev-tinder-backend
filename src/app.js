@@ -8,7 +8,6 @@ const profileRouter = require("./routes/profile.js");
 const requestRouter = require("./routes/request.js");
 const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
-const paymentRouter = require("./routes/payment.js");
 const stripeRouter = require("./routes/stripe.js");
 require("./utils/cronJob.js");
 
@@ -32,7 +31,6 @@ app.use("/", profileRouter);
 app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", adminRouter);
-app.use("/", paymentRouter);
 app.use("/", stripeRouter);
 
 connectDb()

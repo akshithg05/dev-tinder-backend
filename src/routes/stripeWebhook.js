@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const stripe = require("../utils/stripe");
 const { User } = require("../models/user");
+const { Payment } = require("../models/payment");
 
 router.post(
   "/webhook",
@@ -22,6 +23,7 @@ router.post(
       return res.status(400).send(`Webhook Error: ${err.message}`);
     }
 
+    // Handle successful checkout
     if (event.type === "checkout.session.completed") {
       const session = event.data.object;
 
@@ -30,9 +32,8 @@ router.post(
 
       console.log("Payment successful for user:", userId, membershipType);
 
-      // TODO:
+      //Update user premium details
       const user = await User.findById(userId);
-
       if (user) {
         user.isPremium = true;
         user.membershipType = membershipType;
@@ -40,7 +41,19 @@ router.post(
         await user.save();
       }
 
-      // 2. Save payment in Payments collection
+      //Save payment in DB
+      await Payment.create({
+        userId,
+        membershipType,
+        sessionId: session.id,
+        paymentIntentId: session.payment_intent,
+        amount: session.amount_total,
+        currency: session.currency,
+        status: session.payment_status,
+        email: session.customer_details?.email || null,
+      });
+
+      console.log("Payment saved in DB");
     }
 
     res.json({ received: true });

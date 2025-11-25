@@ -1,5 +1,4 @@
 const mongoose = require("mongoose");
-
 const { Schema, model } = mongoose;
 
 const paymentSchema = new Schema(
@@ -7,44 +6,43 @@ const paymentSchema = new Schema(
     userId: {
       type: mongoose.Types.ObjectId,
       ref: "User",
-      required: false,
+      required: true,
     },
-    orderId: {
+
+    membershipType: {
       type: String,
       required: true,
     },
-    paymentId: {
-      type: String,
+
+    sessionId: {
+      type: String, // Stripe Checkout Session ID
+      required: true,
+      unique: true,
     },
-    status: {
-      type: String,
+
+    paymentIntentId: {
+      type: String, // Stripe PaymentIntent ID
       required: true,
     },
+
     amount: {
       type: Number,
       required: true,
     },
+
     currency: {
       type: String,
       required: true,
+      default: "inr",
     },
-    receipt: {
-      type: String,
+
+    status: {
+      type: String, // e.g. "paid"
       required: true,
     },
-    notes: {
-      firstName: {
-        type: String,
-      },
-      lastName: {
-        type: String,
-      },
-      emailId: {
-        type: String,
-      },
-      membershipType: {
-        type: String,
-      },
+
+    email: {
+      type: String, // Customer Email
     },
   },
   { timestamps: true }

@@ -1,10 +1,12 @@
 const express = require("express");
+const { User } = require("../models/user");
 const stripe = require("../utils/stripe");
 const {
   MEMBERSHIP_PAYMENT,
   BACKEND_URL,
   LOCALHOST_URL,
   FRONTEND_URL,
+  MEMBERSHIP_TYPE,
 } = require("../utils/constants");
 const { userAuth } = require("../middlewares/authMiddleware");
 
@@ -23,7 +25,7 @@ router.post("/payment/create-checkout-session", userAuth, async (req, res) => {
           price_data: {
             currency: "inr",
             product_data: {
-              name: `${membershipType} Membership`,
+              name: `${MEMBERSHIP_TYPE[membershipType]} Membership`,
             },
             unit_amount: MEMBERSHIP_PAYMENT[membershipType],
           },
@@ -43,6 +45,23 @@ router.post("/payment/create-checkout-session", userAuth, async (req, res) => {
   } catch (err) {
     console.error("Stripe error:", err);
     res.status(500).json({ message: err.message });
+  }
+});
+
+router.get("/payment/verify-payment", userAuth, async (req, res) => {
+  try {
+    const userId = req?.user?._id;
+
+    const user = await User.findById(userId);
+    const isUserPremium = user?.isPremium || false;
+    const membershipType = isUserPremium ? user?.membershipType : null;
+
+    res.status(200).json({
+      isPremium: isUserPremium,
+      membershipType: membershipType,
+    });
+  } catch (err) {
+    res.status(500).json({ message: err?.message });
   }
 });
 

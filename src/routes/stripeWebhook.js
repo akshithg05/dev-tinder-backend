@@ -3,6 +3,7 @@ const router = express.Router();
 const stripe = require("../utils/stripe");
 const { User } = require("../models/user");
 const { Payment } = require("../models/payment");
+const { MEMBERSHIP_TYPE } = require("../utils/constants");
 
 router.post(
   "/webhook",

@@ -10,7 +10,7 @@ const BASE_URL = "https://dev-tidner.netlify.app/connections";
 const MEMBERSHIP_PAYMENT = {
   SILVER: 30000,
   GOLD: 60000,
-  UPGRADE_TO_GOLD: 20000,
+  UPGRADE_TO_GOLD: 30000,
 };
 
 const MEMBERSHIP_TYPE = {

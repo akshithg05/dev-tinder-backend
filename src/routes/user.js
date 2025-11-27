@@ -58,11 +58,15 @@ userRouter.get("/user/connections", userAuth, async (req, res) => {
       ]);
 
     // Need to send the userId of the connection, not myseld
-    const connections = acceptedConnectionRequests?.map((row) => {
-      if (row.fromUserId.equals(loggedInUser?._id)) {
-        return row?.toUserId;
+    const connections = acceptedConnectionRequests.map((row) => {
+      const fromId = row?.fromUserId?._id?.toString();
+      const toId = row?.toUserId?._id?.toString();
+      const myId = loggedInUser?._id?.toString();
+
+      if (fromId === myId) {
+        return row.toUserId;
       } else {
-        return row?.fromUserId;
+        return row.fromUserId;
       }
     });
 
@@ -183,10 +187,10 @@ userRouter.get("/user/:userId", userAuth, async (req, res) => {
     const userId = req?.params?.userId;
     const user = await User.findById(userId);
 
-    if (!user){
-      const err = new Error('User not found')
-      err.statusCode = 404
-      throw err
+    if (!user) {
+      const err = new Error("User not found");
+      err.statusCode = 404;
+      throw err;
     }
     res.status(200).send({
       user,

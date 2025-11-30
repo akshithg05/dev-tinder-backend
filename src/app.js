@@ -11,6 +11,8 @@ const adminRouter = require("./routes/admin.js");
 const stripeRouter = require("./routes/stripe.js");
 require("./utils/cronJob.js");
 const stripeWebhook = require("./routes/stripeWebhook");
+const http = require("http");
+const { initializeSocket } = require("./utils/socket.js");
 
 const app = express();
 dotenv.config();
@@ -35,10 +37,14 @@ app.use("/", userRouter);
 app.use("/", adminRouter);
 app.use("/", stripeRouter);
 
+const server = http.createServer(app);
+
+initializeSocket(server);
+
 connectDb()
   .then(() => {
     console.log("DB Connection successful");
-    app.listen(port, () => {
+    server.listen(port, () => {
       console.log(`Listening on port ${port}`);
     });
   })

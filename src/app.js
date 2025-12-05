@@ -9,6 +9,7 @@ const requestRouter = require("./routes/request.js");
 const userRouter = require("./routes/user.js");
 const adminRouter = require("./routes/admin.js");
 const stripeRouter = require("./routes/stripe.js");
+const chatRouter = require("./routes/chat.js");
 require("./utils/cronJob.js");
 const stripeWebhook = require("./routes/stripeWebhook");
 const http = require("http");
@@ -36,6 +37,7 @@ app.use("/", requestRouter);
 app.use("/", userRouter);
 app.use("/", adminRouter);
 app.use("/", stripeRouter);
+app.use("/", chatRouter);
 
 const server = http.createServer(app);
 
